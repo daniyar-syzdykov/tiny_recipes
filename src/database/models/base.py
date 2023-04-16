@@ -1,6 +1,9 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, update, delete, exists
 from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
 
 
 class DBMixin:
@@ -32,7 +35,7 @@ class DBMixin:
     async def get_all(cls, session):
         query = select(cls)
         result = await cls._execute_query(query, session)
-        result = [i[0] for i in result.all()]
+        result = [i[0] for i in result.all()] if result else []
         return result
 
     def _update_row_values(self, **kwargs):
@@ -61,7 +64,7 @@ class DBMixin:
         query = select(cls).where(cls.id == id)
         result = await cls._execute_query(query, session)
         result = result.unique().one_or_none()
-        return result[0]
+        return result[0] if result else None
 
     @classmethod
     async def delete(cls, id, session):
